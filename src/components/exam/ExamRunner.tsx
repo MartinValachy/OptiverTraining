@@ -309,6 +309,7 @@ export function ExamRunner<I, R>({
             setDraft={setDraft}
             submit={submit}
             locked={false}
+            ctx={config}
           />
           {st.error && (
             <div className="mt-3 rounded-lg border border-bad px-3 py-2 text-sm text-bad" role="alert" data-testid="exam-error">

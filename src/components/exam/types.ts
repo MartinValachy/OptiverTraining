@@ -19,6 +19,8 @@ export interface ItemViewProps<I, R> {
   submit: (r: R | null) => void;
   /** training: answer has been submitted, show correctness */
   locked: boolean;
+  /** run context: exam config or training settings */
+  ctx?: Record<string, unknown>;
 }
 
 export interface Scored<I, R> {
@@ -32,6 +34,8 @@ export interface Scored<I, R> {
 }
 
 export interface QuestionModule<I, R> {
+  /** custom exam plan (default: families cycled, difficulty ramping 1 → 3) */
+  plan?: (count: number, seed: number, config: Record<string, unknown>) => ItemKey[];
   id: ModuleId;
   title: string;
   families: FamilyInfo[];

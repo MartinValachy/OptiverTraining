@@ -24,6 +24,10 @@ type View =
   | { kind: "exam"; keys: ItemKey[]; setup: ExamSetup; seed: number }
   | { kind: "training"; families: string[]; difficulty: "auto" | Difficulty };
 
+export function planFor<I, R>(mod: QuestionModule<I, R>, s: ExamSetup, seed: number): ItemKey[] {
+  return mod.plan ? mod.plan(s.count, seed, s.config) : planItems(mod.id, mod.families.map((f) => f.id), s.count, seed);
+}
+
 export function readQuery(): URLSearchParams {
   return new URLSearchParams(typeof window === "undefined" ? "" : window.location.search);
 }
@@ -33,14 +37,12 @@ export function ModuleHome<I, R>({
   about,
   examSetup,
   presets,
-  plan,
   softLimitMs,
 }: {
   mod: QuestionModule<I, R>;
   about: ReactNode;
   examSetup: (prefs: Prefs, opts: { quick: boolean; preset: string | null }) => ExamSetup;
   presets?: { id: string; label: string }[];
-  plan?: (count: number, seed: number) => ItemKey[];
   softLimitMs?: (prefs: Prefs) => number | null;
 }) {
   const { prefs, prefsLoaded } = useApp();
@@ -52,8 +54,7 @@ export function ModuleHome<I, R>({
 
   function startExam(quick: boolean, seed: number, presetId: string | null) {
     const s = examSetup(prefs, { quick, preset: presetId });
-    const keys = plan ? plan(s.count, seed) : planItems(mod.id, mod.families.map((f) => f.id), s.count, seed);
-    setView({ kind: "exam", keys, setup: s, seed });
+    setView({ kind: "exam", keys: planFor(mod, s, seed), setup: s, seed });
   }
 
   // Deep links: ?mode=exam&quick=1&seed=42 or ?mode=training&family=dice
@@ -64,7 +65,7 @@ export function ModuleHome<I, R>({
     if (mode === "exam") {
       const seed = q.get("seed") ? Number(q.get("seed")) : randomSeed();
       const s = examSetup(prefs, { quick: q.get("quick") === "1", preset: q.get("preset") });
-      const keys = plan ? plan(s.count, seed) : planItems(mod.id, mod.families.map((f) => f.id), s.count, seed);
+      const keys = planFor(mod, s, seed);
       queueMicrotask(() => setView({ kind: "exam", keys, setup: s, seed }));
     } else if (mode === "training") {
       const f = q.get("family");

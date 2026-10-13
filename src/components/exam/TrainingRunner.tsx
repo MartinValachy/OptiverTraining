@@ -201,6 +201,7 @@ export function TrainingRunner<I, R>({
         setDraft={(d) => setCur((c) => (c && !c.result ? { ...c, draft: d, error: null } : c))}
         submit={answer}
         locked={!!cur.result}
+        ctx={{ families, mode: "training" }}
       />
       {cur.error && (
         <div className="mt-3 rounded-lg border border-bad px-3 py-2 text-sm text-bad" role="alert">
