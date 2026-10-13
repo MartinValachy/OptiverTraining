@@ -6,6 +6,7 @@ import { getSupabase } from "@/lib/supabase";
 import { DEFAULT_PREFS, mergePrefs, type Prefs } from "@/lib/config";
 import { getPrefsRow, listOutbox, putPrefsRow } from "@/lib/db/local";
 import { pullRemote, pushOutbox } from "@/lib/db/sync";
+import { migrateFallback } from "@/lib/engine/record";
 import { supabaseRemote } from "@/lib/db/remote";
 
 interface AppCtx {
@@ -86,6 +87,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         /* private mode without IndexedDB: keep defaults */
       }
       setPrefsLoaded(true);
+      try {
+        await migrateFallback();
+        // ask the browser not to evict our IndexedDB under storage pressure (iOS)
+        await navigator.storage?.persist?.();
+      } catch {
+        /* ignore */
+      }
       refreshPending();
     })();
   }, [refreshPending]);
@@ -163,7 +171,4 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-/** Notify the provider that local rows were written (triggers a sync attempt). */
-export function notifySaved() {
-  if (typeof window !== "undefined") window.dispatchEvent(new Event("oa:saved"));
-}
+export { notifySaved } from "@/lib/events";

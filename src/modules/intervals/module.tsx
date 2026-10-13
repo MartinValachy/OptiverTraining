@@ -60,7 +60,7 @@ function View({ item, mode, draft, setDraft, submit, locked, response }: ItemVie
       </form>
       <div className="mt-2 flex min-h-6 items-center justify-between text-sm">
         {err ? (
-          <span className="text-bad" role="alert">
+          <span className="text-bad" role="alert" data-testid="iv-error">
             {err}
           </span>
         ) : (
