@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+:root {
+  --bg: #f6f7f9;
+  --fg: #12151a;
+  --muted: #5d6673;
+  --card: #ffffff;
+  --card2: #eef0f3;
+  --border: #d9dde3;
+  --accent: #2463eb;
+  --accent-fg: #ffffff;
+  --good: #15803d;
+  --bad: #c62828;
+  --warn: #b45309;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #0e1116;
+  --fg: #e6e9ee;
+  --muted: #8b95a3;
+  --card: #161a21;
+  --card2: #1e232c;
+  --border: #2a313c;
+  --accent: #5b8cff;
+  --accent-fg: #0b0e13;
+  --good: #34c771;
+  --bad: #ff6b6b;
+  --warn: #f0b04a;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-card2: var(--card2);
+  --color-line: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
+  --color-warn: var(--warn);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+body {
+  font-family: var(--font-sans);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+button,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tap targets are >= 44px everywhere */
+.btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-line bg-card px-4 py-2 text-sm font-medium select-none transition-colors active:scale-[0.98] disabled:opacity-40;
+}
+.btn-primary {
+  @apply border-accent bg-accent text-accent-fg;
+}
+.btn-ghost {
+  @apply border-transparent bg-transparent;
+}
+.card {
+  @apply rounded-xl border border-line bg-card;
+}
+.input {
+  @apply min-h-11 w-full rounded-lg border border-line bg-card px-3 py-2 text-base tabular outline-none focus:border-accent;
+}
+.chip {
+  @apply inline-flex items-center rounded-full border border-line px-2 py-0.5 text-xs text-muted;
+}
+.kbd {
+  @apply hidden rounded border border-line px-1 font-mono text-[10px] text-muted md:inline;
+}
