@@ -37,6 +37,7 @@ export const TARGET_MS: Record<ModuleId, number> = {
   orderbooks: 20_000,
   zapn: 60_000,
   warmup: 6_000,
+  mock: 60_000,
 };
 
 export function familyKey(module: ModuleId, family: string): string {
@@ -65,7 +66,7 @@ export function updateSkill(prev: SkillRow | undefined, key: string, results: Pi
     sumS += s;
     const k = n < 20 ? 40 : 20;
     rating += k * (s - expectedScore(rating, r.difficulty));
-    avg = n === 0 ? r.ms_taken : 0.8 * avg + 0.2 * r.ms_taken;
+    if (r.correct !== null) avg = avg === 0 ? r.ms_taken : 0.8 * avg + 0.2 * r.ms_taken;
     n++;
   }
   const mod = moduleOfKey(key);

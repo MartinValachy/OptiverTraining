@@ -1,8 +1,8 @@
 "use client";
 
+import { EXAM_SETUP, SOFT_LIMIT } from "@/modules/registry";
 import { ModuleHome } from "@/components/exam/ModuleHome";
 import { warmupModule } from "@/modules/warmup/module";
-import { QUICK_EXAM } from "@/lib/config";
 
 export default function WarmupPage() {
   return (
@@ -14,17 +14,8 @@ export default function WarmupPage() {
           <p className="mt-2 text-muted">Type the answer and press Enter. Non-terminating decimals: 3 dp.</p>
         </>
       }
-      examSetup={(prefs, { quick }) => {
-        const c = quick ? QUICK_EXAM.warmup : prefs.exam.warmup;
-        return {
-          count: c.count,
-          timing: { perQuestionMs: null, totalMs: c.totalSec * 1000 },
-          navigation: "forward",
-          summary: `${c.count} questions, shared ${Math.round(c.totalSec / 60)}:00 clock, typed answers`,
-          config: { ...c },
-        };
-      }}
-      softLimitMs={() => 6000}
+      examSetup={EXAM_SETUP.warmup}
+      softLimitMs={SOFT_LIMIT.warmup}
     />
   );
 }

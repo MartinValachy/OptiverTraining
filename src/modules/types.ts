@@ -1,4 +1,4 @@
-export type ModuleId = "bto" | "numberlogic" | "likelihood" | "intervals" | "orderbooks" | "zapn" | "warmup";
+export type ModuleId = "bto" | "numberlogic" | "likelihood" | "intervals" | "orderbooks" | "zapn" | "warmup" | "mock";
 export type Mode = "exam" | "training";
 export type Difficulty = 1 | 2 | 3;
 export const DIFFICULTIES: Difficulty[] = [1, 2, 3];
@@ -62,6 +62,7 @@ export const MODULE_NAMES: Record<ModuleId, string> = {
   orderbooks: "Orderbooks",
   zapn: "Zap-N",
   warmup: "Mental-math warm-up",
+  mock: "Full mock battery",
 };
 
 export const MODULE_PATHS: Record<ModuleId, string> = {
@@ -72,4 +73,5 @@ export const MODULE_PATHS: Record<ModuleId, string> = {
   orderbooks: "/orderbooks/",
   zapn: "/zap-n/",
   warmup: "/warmup/",
+  mock: "/mock/",
 };

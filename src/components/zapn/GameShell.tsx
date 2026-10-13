@@ -34,6 +34,40 @@ export interface GameProps {
 }
 
 /** Countdown for a game session, driven by performance.now() deltas. */
+/** Persist one Zap-N session (attempt + one item result for the skill engine). */
+export function recordGameSession(game: string, result: GameResult, durationMs: number, startedAt: string, extraConfig: Record<string, unknown> = {}) {
+  const now = new Date().toISOString();
+  const id = uuid();
+  const rt = result.rts?.length ? rtStats(result.rts) : null;
+  const attempt: Attempt = {
+    id,
+    module: "zapn",
+    mode: "exam",
+    config: { game, sessionSec: durationMs / 1000, ...extraConfig },
+    started_at: startedAt || now,
+    finished_at: now,
+    score: Math.round(result.score * 100) / 100,
+    max_score: 0,
+    meta: { perf: result.perf, metrics: result.metrics, rt, analysis: result.analysis ?? null },
+  };
+  recordAttempt(attempt, [
+    {
+      id: uuid(),
+      attempt_id: id,
+      module: "zapn",
+      family: game,
+      difficulty: 1,
+      seed: 0,
+      response: { metrics: result.metrics, rt },
+      correct: result.perf >= 0.7,
+      score: result.perf,
+      ms_taken: durationMs,
+      created_at: now,
+    },
+  ]);
+  return attempt;
+}
+
 export function useSessionTimer(durationMs: number, active: boolean, onExpire: () => void): number {
   const clock = useExamClock();
   const [left, setLeft] = useState(durationMs);
@@ -88,36 +122,7 @@ export function GameShell({ meta, Game, Analysis }: { meta: GameMeta; Game: Comp
 
   function finish(result: GameResult, tutorial: boolean) {
     setPhase({ kind: "results", result, tutorial });
-    if (tutorial) return;
-    const now = new Date().toISOString();
-    const id = uuid();
-    const rt = result.rts?.length ? rtStats(result.rts) : null;
-    const attempt: Attempt = {
-      id,
-      module: "zapn",
-      mode: "exam",
-      config: { game: meta.id, sessionSec: durationMs / 1000 },
-      started_at: started.current || now,
-      finished_at: now,
-      score: Math.round(result.score * 100) / 100,
-      max_score: 0,
-      meta: { perf: result.perf, metrics: result.metrics, rt, analysis: result.analysis ?? null },
-    };
-    recordAttempt(attempt, [
-      {
-        id: uuid(),
-        attempt_id: id,
-        module: "zapn",
-        family: meta.id,
-        difficulty: 1,
-        seed: 0,
-        response: { metrics: result.metrics, rt },
-        correct: result.perf >= 0.7,
-        score: result.perf,
-        ms_taken: durationMs,
-        created_at: now,
-      },
-    ]);
+    if (!tutorial) recordGameSession(meta.id, result, durationMs, started.current);
   }
 
   if (phase.kind === "tutorial" || phase.kind === "play") {
