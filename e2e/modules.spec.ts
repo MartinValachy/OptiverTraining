@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { planItems } from "../src/lib/plan";
 import { BTO_FAMILY_INFO, generateBto } from "../src/modules/bto/index";
-import { WARMUP_FAMILIES, generateWarmup } from "../src/modules/warmup/logic";
+import { generateWarmup, planEighty, sprintItem } from "../src/modules/warmup/logic";
 import { generateOB } from "../src/modules/orderbooks/generate";
 import { planOrderbooks } from "../src/modules/orderbooks/module";
 import { QUICK_EXAM } from "../src/lib/config";
@@ -99,16 +99,29 @@ test("Orderbooks: multi-click arbitrage solutions from the solver score every bo
   await expect(page.getByTestId("final-score")).toHaveText(String(boards.length));
 });
 
-test("Mental-math warm-up: typed answers", async ({ page }) => {
-  const keys = planItems("warmup", WARMUP_FAMILIES.map((f) => f.id), QUICK_EXAM.warmup.count, SEED);
-  await page.goto(`/warmup/?mode=exam&quick=1&seed=${SEED}`);
-  for (const k of keys) {
+test("Mental math: 80 in 8 (multiple choice, +1/−1) and a Zetamac-style sprint", async ({ page }) => {
+  const keys = planEighty(QUICK_EXAM.warmup.count, SEED);
+  await page.goto(`/warmup/?drill=eighty&quick=1&seed=${SEED}`);
+  await page.getByTestId("drill-start").click();
+  for (const [i, k] of keys.entries()) {
     const it = generateWarmup(k.family, k.difficulty, k.seed);
-    await expect(page.getByTestId("warmup-prompt")).toHaveText(it.prompt);
-    await page.getByTestId("warmup-input").fill(it.display);
-    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("drill-prompt")).toHaveText(it.prompt);
+    // last one deliberately wrong: net = (n − 1) − 1
+    await page.getByTestId(`drill-opt-${i === keys.length - 1 ? (it.correctIndex + 1) % 4 : it.correctIndex}`).click();
   }
-  await expect(page.getByTestId("final-score")).toHaveText(String(keys.length));
+  await expect(page.getByTestId("drill-score")).toHaveText(String(keys.length - 2));
+  expect(await noHorizontalScroll(page)).toBe(true);
+
+  await page.goto(`/warmup/?drill=sprint&set=eighty&sec=6&seed=${SEED}`);
+  await page.getByTestId("drill-start").click();
+  for (let i = 0; i < 3; i++) {
+    const it = sprintItem("eighty", SEED, i);
+    await expect(page.getByTestId("drill-prompt")).toHaveText(it.prompt);
+    // comma decimal separator (European keypads) is accepted; no Enter needed
+    await page.getByTestId("drill-input").pressSequentially(it.display.replace(".", ","));
+  }
+  await expect(page.getByTestId("drill-status")).toContainText("Score: 3");
+  await expect(page.getByTestId("drill-score")).toHaveText("3", { timeout: 15_000 });
 });
 
 for (const game of ["balloon", "pincode", "codecompare", "switch", "numberbox", "tower", "shapeshift", "grill", "pattern", "dial"]) {

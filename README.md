@@ -81,7 +81,7 @@ There are no API routes or server actions — the output is a static site plus t
 | Intervals | 18 questions, 60 s, score lower ÷ upper if the truth is inside | 7 families incl. SVG shape grids (80–200 shapes) and dot fields; calibration review |
 | Orderbooks | 20 boards, shared 8:00, any valid arbitrage = 1 point | 3 phases (direct, bundle, ratio) verified by a solver; optional no-opportunity boards |
 | Zap-N | 3-min sessions (configurable) | Balloon, Pincode, CodeCompare, The Switch, NumberBox, Skyscraper, Shapeshift, Grill Master, Pattern Guess, Stock Indicator |
-| Warm-up | 80 questions in 8 min | integer ops, decimals, fractions ↔ decimals, percentages |
+| Mental math | 80 in 8: 80 questions, 8:00, 4 options, tap advances, no skip/back, +1/−1. Sprint: typed, auto-advance on a correct answer (Zetamac style), 60/120/300 s | +, −, ×, ÷ on integers, decimals and fractions, missing-number forms (66 × ? = 138.6); or Zetamac default ranges |
 
 Around the modules: an Elo-style rating per family with adaptive difficulty (targets ~75% accuracy),
 a daily **Today** session driven by spaced repetition of weak/slow/overdue families, a **dashboard**
@@ -106,6 +106,9 @@ Optiver rotates details and the public reports are incomplete, so these are conf
   rules 2; cubic and 3-step operation cycles 3; 4-step cycles 4; composite rules (interleaved, alternating
   sign, fraction pairs, difference/ratio sequences) = 1 + their inner rule. Operation cycles are shown with
   at least two instances of every step.
+- **80 in 8**: candidate reports (not Optiver) describe 4-option multiple choice, +1/−1, no going back; skip
+  rules are disputed, so the drill has no skip and unreached questions score 0. Percentages are not included
+  because no report lists them. It may no longer be part of the 2026/27 battery.
 - **Zap-N**: all ten game mechanics are reconstructions from candidate reports; parameters are in
   `src/modules/zapn/config.ts`. Exam mode for Zap-N = a timed session that is recorded.
 

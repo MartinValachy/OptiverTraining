@@ -11,8 +11,8 @@ function View({ item, draft, setDraft, submit, locked, response }: ItemViewProps
   }, [item]);
   const value = locked ? (response ?? "") : (draft ?? "");
   return (
-    <div className="card p-5">
-      <div className="mb-4 text-center font-mono text-3xl font-semibold tabular" data-testid="warmup-prompt">
+    <div className="card px-4 py-6">
+      <div className="tabular mb-5 text-center text-4xl font-semibold tracking-tight" data-testid="warmup-prompt">
         {item.prompt}
       </div>
       <form
@@ -20,24 +20,24 @@ function View({ item, draft, setDraft, submit, locked, response }: ItemViewProps
           e.preventDefault();
           if (!locked && value.trim()) submit(value.trim());
         }}
-        className="flex gap-2"
+        className="flex justify-center gap-2"
       >
         <input
           ref={ref}
-          className="input text-center text-xl"
-          inputMode={item.format === "fraction" ? "text" : "decimal"}
+          className="tabular w-48 rounded-xl border-2 border-line bg-card px-3 py-2 text-center text-3xl outline-none focus:border-accent"
+          inputMode="decimal"
           autoComplete="off"
           autoCorrect="off"
           enterKeyHint="go"
-          placeholder={item.format === "fraction" ? "a/b" : "answer"}
+          placeholder="Answer"
           value={value}
           disabled={locked}
           onChange={(e) => setDraft(e.target.value)}
           aria-label="Answer"
           data-testid="warmup-input"
         />
-        {item.format === "fraction" && !locked && (
-          <button type="button" className="btn" onClick={() => setDraft((draft ?? "") + "/")}>
+        {!item.typeable && !locked && (
+          <button type="button" className="btn text-xl" onClick={() => setDraft((draft ?? "") + "/")} aria-label="fraction bar">
             /
           </button>
         )}
@@ -48,10 +48,13 @@ function View({ item, draft, setDraft, submit, locked, response }: ItemViewProps
 
 function Solution({ item }: { item: WarmupItem; response: string | null }) {
   return (
-    <p className="text-sm">
-      {item.prompt} = <b className="tabular">{item.display}</b>
-      {item.tol > 0 ? " (rounded; ±0.0005 accepted)" : ""}
-    </p>
+    <div className="space-y-1 text-sm">
+      <p>
+        {item.prompt.includes("?") ? item.prompt.replace("?", `[${item.display}]`) : `${item.prompt} = `}
+        {!item.prompt.includes("?") && <b className="tabular">{item.display}</b>}
+      </p>
+      <p className="text-muted">{item.method}</p>
+    </div>
   );
 }
 
@@ -64,16 +67,17 @@ export const warmupModule: QuestionModule<WarmupItem, string> = {
     const c = checkWarmup(item, r);
     return { correct: c, score: c ? 1 : 0 };
   },
-  // shared-clock module: an unsubmitted entry is not counted
   canSubmit: (d) => !!d && d.trim() !== "",
   View,
   Solution,
   hint: (item) =>
-    item.family === "pct"
-      ? "Convert the percentage to a fraction first (e.g. 12.5% = 1/8)."
+    item.family === "missing"
+      ? "Turn it around: a missing factor is a division, a missing addend is a subtraction."
       : item.family === "frac"
-        ? "Memorise eighths (0.125 steps) and twelfths; scale numerator and denominator to a power of 10."
-        : "Split into round numbers: a × b = a × (round − diff).",
+        ? "“a/b of N”: divide by b first, then multiply by a."
+        : item.family === "div"
+          ? "Dividing by a decimal: scale both numbers by 10 until the divisor is whole."
+          : "Split into round numbers and adjust.",
   describe: (item) => item.prompt,
   answerLabel: (item) => item.display,
   responseLabel: (_i, r) => r ?? "—",

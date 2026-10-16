@@ -19,13 +19,10 @@ test("PWA works offline and queues attempts locally", async ({ page, context }, 
     )
     .toBeGreaterThan(50);
   await context.setOffline(true);
-  await page.goto("/warmup/?mode=exam&quick=1&seed=2");
-  await expect(page.getByTestId("warmup-input")).toBeVisible();
-  for (let i = 0; i < 5; i++) {
-    await page.getByTestId("warmup-input").fill("1");
-    await page.keyboard.press("Enter");
-  }
-  await expect(page.getByTestId("review")).toBeVisible();
+  await page.goto("/warmup/?drill=eighty&quick=1&seed=2");
+  await page.getByTestId("drill-start").click();
+  for (let i = 0; i < 5; i++) await page.getByTestId("drill-opt-0").click();
+  await expect(page.getByTestId("drill-results")).toBeVisible();
   const queued = await page.evaluate(
     () =>
       new Promise<number>((resolve, reject) => {
